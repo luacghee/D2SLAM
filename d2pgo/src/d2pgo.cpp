@@ -9,6 +9,15 @@
 
 namespace D2PGO {
 
+void D2PGO::log_pgo_time(double duration, std::string fname) {
+    std::string path = config.g2o_output_path + fname;
+    //output the duration of the frame.
+    std::fstream file;
+    file.open(path.c_str(), std::fstream::app);
+    file << std::fixed << duration << std::endl;
+    file.close();
+}
+
 void D2PGO::addFrame(D2BaseFrame frame) {
     const Guard lock(state_lock);
     if (config.is_realtime && state.hasDrone(frame.drone_id)) {

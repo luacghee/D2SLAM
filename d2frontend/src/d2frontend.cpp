@@ -24,6 +24,15 @@
 namespace D2FrontEnd {
 typedef std::lock_guard<std::mutex> lock_guard;
 
+void D2Frontend::log_fe_time(double duration, std::string fname) {
+    std::string path = "/root/output//" + fname;
+    //output the duration of the frame.
+    std::fstream file;
+    file.open(path.c_str(), std::fstream::app);
+    file << std::fixed << duration << std::endl;
+    file.close();
+}
+
 void D2Frontend::onLoopConnection(LoopEdge & loop_con, bool is_local) {
     if(is_local && params->pgo_mode == PGO_MODE::PGO_MODE_NON_DIST) {
         //Only PGO is non-distributed we broadcast the loops.
@@ -92,6 +101,7 @@ void D2Frontend::monoImageCallback(const sensor_msgs::ImageConstPtr & image) {
 }
 
 void D2Frontend::processStereoframe(const StereoFrame & stereoframe) {
+    double t_fe_processStereoframe_start = ros::Time::now().toSec();
     static int count = 0;
     // ROS_INFO("[D2Frontend::processStereoframe] %d", count ++);
     auto vframearry = loop_cam->processStereoframe(stereoframe);
@@ -100,6 +110,12 @@ void D2Frontend::processStereoframe(const StereoFrame & stereoframe) {
     vframearry.prevent_adding_db = !is_keyframe;
     vframearry.is_keyframe = is_keyframe;
     received_image = true;
+
+    double t_fe_processStereoframe_end = ros::Time::now().toSec();
+    double duration_fe_processStereoframe = t_fe_processStereoframe_end - t_fe_processStereoframe_start;
+    log_fe_time(t_fe_processStereoframe_start, "t_fe_processStereoframe_start.txt");
+    log_fe_time(duration_fe_processStereoframe, "d_fe_processStereoframe.txt");
+
     if (!params->show) {
         vframearry.releaseRawImages();
     }

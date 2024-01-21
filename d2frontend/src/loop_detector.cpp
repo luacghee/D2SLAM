@@ -20,6 +20,14 @@ using namespace D2Common;
 #define MAX_LOOP_ID 100000000
 
 namespace D2FrontEnd {
+void LoopDetector::log_ld_time(double duration, std::string fname) {
+    std::string path = "/root/output//" + fname;
+    //output the duration of the frame.
+    std::fstream file;
+    file.open(path.c_str(), std::fstream::app);
+    file << std::fixed << duration << std::endl;
+    file.close();
+}
 
 void LoopDetector::processImageArray(VisualImageDescArray & image_array) {
     //Lock frame_mutex with Guard
@@ -29,6 +37,7 @@ void LoopDetector::processImageArray(VisualImageDescArray & image_array) {
     static int t_count = 0;
     
     auto start = high_resolution_clock::now();
+    double t_fe_processImageArray_start = ros::Time::now().toSec();
     
     if (t0 < 0) {
         t0 = image_array.stamp;
@@ -134,6 +143,8 @@ void LoopDetector::processImageArray(VisualImageDescArray & image_array) {
                 auto stop = high_resolution_clock::now(); 
             }
         }
+        double t_fe_matching_end = ros::Time::now().toSec();
+
         if (success) {
             if (!is_matched_frame && is_lazy_frame) {
                 //In this case, we need to send the matched frame to the drone
@@ -161,7 +172,16 @@ void LoopDetector::processImageArray(VisualImageDescArray & image_array) {
         } else {
             if (params->verbose)
                 printf("[LoopDetector@%d] No matched image for frame %ld\n", self_id, image_array.frame_id);
-        }     
+        }
+        
+        double t_fe_computloop_end = ros::Time::now().toSec();
+        double duration_fe_matching = t_fe_matching_end - t_fe_processImageArray_start;
+        double duration_fe_computeloop = t_fe_computloop_end - t_fe_matching_end;
+
+        log_ld_time(t_fe_processImageArray_start, "t_fe_processImageArray_start.txt");        
+        log_ld_time(duration_fe_matching, "d_fe_matching.txt");
+        log_ld_time(duration_fe_computeloop, "d_fe_computeloop.txt");
+
         if (!is_lazy_frame && (!image_array.prevent_adding_db || new_node)) {
             if (image_array.drone_id == self_id) { 
                 //Only add local frame to database

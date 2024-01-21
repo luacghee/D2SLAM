@@ -91,9 +91,20 @@ protected:
         feature_tracker->updatebyLandmarkDB(estimator->getLandmarkDB());
     }
 
+    void log_vins_time(double duration, std::string fname) {
+        std::string path = "/root/output//" + fname;
+        //output the duration of the frame.
+        std::fstream file;
+        file.open(path.c_str(), std::fstream::app);
+        file << std::fixed << duration << std::endl;
+        file.close();
+    }
+
     void processVIOKFThread() {
         while(ros::ok()) {
             if (!viokf_queue.empty()) {
+                double t_vins_viokf_start = ros::Time::now().toSec();
+                
                 Utility::TicToc estimator_timer;
                 if (viokf_queue.size() > params->warn_pending_frames) {
                     ROS_WARN("[D2VINS] Low efficient on D2VINS::estimator pending frames: %d", viokf_queue.size());
@@ -154,6 +165,12 @@ protected:
                         printf("[D2VINS] broadcastVisualImageDescArray takes %.1f ms\n", broadcast_timer.toc());
                     }
                 }
+                double t_vins_viokf_end = ros::Time::now().toSec();
+                double duration_vins_viokf = t_vins_viokf_end - t_vins_viokf_start;
+
+                log_vins_time(t_vins_viokf_start, "t_vins_viokf_start.txt");
+                log_vins_time(duration_vins_viokf, "d_vins_viokf.txt");
+
             } else {
                 usleep(1000);
             }
@@ -192,6 +209,8 @@ protected:
     void solverThread() {
         while (ros::ok()) {
             if (need_solve) {
+                double t_vins_solver_start = ros::Time::now().toSec();
+
                 estimator->solveinDistributedMode();
                 updateOutModuleSldWinAndLandmarkDB();
                 if (!params->consensus_sync_to_start) {
@@ -199,6 +218,11 @@ protected:
                 } else {
                     usleep(0.5/params->estimator_timer_freq*1e6);
                 }
+                double t_vins_solver_end = ros::Time::now().toSec();
+                double duration_vins_solver = t_vins_solver_end - t_vins_solver_start;
+                log_vins_time(t_vins_solver_start, "t_vins_viokf_start.txt");
+                log_vins_time(duration_vins_solver, "d_vins_solver.txt");
+
             } else {
                 usleep(1000);
             }

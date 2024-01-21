@@ -106,6 +106,8 @@ protected:
     void drawMatched(const VisualImageDescArray & fisheye_desc_a, const VisualImageDescArray & fisheye_desc_b,
             int main_dir_a, int main_dir_b, bool success, std::vector<int> inliers, Swarm::Pose DP_b_to_a,
             std::vector<std::pair<int, int>> index2dirindex_a, std::vector<std::pair<int, int>> index2dirindex_b);
+    void log_ld_time(double dusration, std::string fname);
+            
 public:
     std::function<void(LoopEdge &)> on_loop_cb;
     std::function<void(VisualImageDescArray&)> broadcast_keyframe_cb;

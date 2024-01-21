@@ -109,6 +109,8 @@ protected:
 
     void solverTimerCallback(const ros::TimerEvent & event) {
         bool succ;
+        double t_pgo_start = ros::Time::now().toSec();
+        
         if (multi) {
             // printf("[D2PGO] try to solve multi......\n");
             succ = pgo->solve_multi();            
@@ -116,6 +118,12 @@ protected:
         else {
             succ = pgo->solve_single();
         }
+        
+        double t_pgo_end = ros::Time::now().toSec();
+        double duration_pgo = t_pgo_end - t_pgo_start;
+        pgo->log_pgo_time(t_pgo_start, "t_pgo_start.txt");
+        pgo->log_pgo_time(duration_pgo, "d_pgo.txt");
+
         if (succ) { 
             auto trajs = pgo->getOptimizedTrajs();
             pubTrajs(trajs);

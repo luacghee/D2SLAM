@@ -58,6 +58,7 @@ public:
         available_robots{_config.self_id} {
     }
     void evalLoop(const Swarm::LoopEdge & loop);
+    void log_pgo_time(double duration, std::string fname);
     void addFrame(D2BaseFrame frame_desc);
     void addLoop(const Swarm::LoopEdge & loop_info, bool add_state_by_loop=false);
     void setStateProperties(ceres::Problem & problem);

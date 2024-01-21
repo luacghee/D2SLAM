@@ -45,6 +45,7 @@ protected:
 
     virtual void backendFrameCallback(const VisualImageDescArray & viokf) {};
 
+    void log_fe_time(double duration, std::string fname);
     void onLoopConnection (LoopEdge & loop_con, bool is_local = false);
 
     std::queue<StereoFrame> raw_stereo_images;
