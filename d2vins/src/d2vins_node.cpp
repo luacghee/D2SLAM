@@ -220,7 +220,7 @@ protected:
                 }
                 double t_vins_solver_end = ros::Time::now().toSec();
                 double duration_vins_solver = t_vins_solver_end - t_vins_solver_start;
-                log_vins_time(t_vins_solver_start, "t_vins_viokf_start.txt");
+                log_vins_time(t_vins_solver_start, "t_vins_solver_start.txt");
                 log_vins_time(duration_vins_solver, "d_vins_solver.txt");
 
             } else {
